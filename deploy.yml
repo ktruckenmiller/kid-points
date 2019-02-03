@@ -1,0 +1,23 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars:
+    stackname: kid-points
+    version: "{{lookup('ENV', 'GIT_COMMIT')}}"
+    region: us-west-2
+  tasks:
+    - archive:
+        path: kidpoints
+        format: zip
+        dest: deployment.zip
+
+    - name: upload s3 assets
+      shell: aws s3 cp deployment.zip s3://lambda-deploys/kidpoints/{{version}}/deployment.zip --region {{region}}
+
+    - name: deploy to cloudformation
+      cloudformation:
+        stack_name: "{{stackname}}"
+        region: "{{region}}"
+        template: deployment/cfn.yml
+        template_parameters:
+          Version: "{{lookup('ENV', 'GIT_COMMIT')}}"
