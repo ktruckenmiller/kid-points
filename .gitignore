@@ -1,0 +1,3 @@
+*.retry
+deployment.zip
+*.pyc
